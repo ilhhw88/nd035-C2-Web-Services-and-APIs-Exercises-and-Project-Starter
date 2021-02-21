@@ -1,15 +1,17 @@
 package com.udacity.vehicles.api;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+
+
 
 import com.udacity.vehicles.client.maps.MapsClient;
 import com.udacity.vehicles.client.prices.PriceClient;
@@ -33,6 +35,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 
 import static org.mockito.Mockito.times;
@@ -135,6 +138,27 @@ public class CarControllerTest {
         mvc.perform(delete("/cars/1"))
                 .andExpect(status().isNoContent());
         verify(carService, times(1)).delete(1L);
+    }
+    //test for update car function
+    @Test
+    public void testUpdateCar() throws Exception {
+        Car updatedCar = this.getCar();
+        updatedCar.setId(1L);
+        mvc.perform(
+                put(new URI("/cars/1"))
+                        .content(json.write(updatedCar).getJson())
+                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;" +
+                        "charset=UTF-8"))
+                .andExpect(MockMvcResultMatchers.jsonPath(
+                        "id").value(updatedCar.getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath(
+                        "price").value(updatedCar.getPrice()))
+                .andExpect(MockMvcResultMatchers.jsonPath(
+                        "condition").value(updatedCar.getCondition().name()));
+
     }
 
     /**
